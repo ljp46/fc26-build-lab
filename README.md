@@ -26,7 +26,13 @@ Open http://127.0.0.1:4173. `dist/` contains only the public site. On a Windows 
 
 In GitHub repository **Settings → Pages → Build and deployment**, choose **GitHub Actions**. The included workflow tests, builds and publishes pushes to `main`; PRs only run tests/build. The expected URL after successful deployment is `https://ljp46.github.io/fc26-build-lab/`.
 
-## Enable chat (owner setup)
+## OpenAI migration
+
+The Worker is configured for OpenAI Responses with gpt-5.4-mini. Add an encrypted OPENAI_API_KEY secret; retain TEAM_CODE. The Gemini key is not used while AI_PROVIDER=openai. OpenAI receives the message, recent conversation and build/reference context with store:false. Optional research uses one web-search tool call. This is paid API usage.
+
+The owner approved up to $5 for agent-led testing. This is not an implemented global spending cap: the existing per-location rate limiter does not cap account costs. Record live test usage and keep the test run within that budget. Maximum calls per chat: one optional research request plus up to three generation requests including a transient retry and validation repair. No automatic model fallback. Live migration verification is pending the owner's key.
+
+## Previous Gemini setup (reference only)
 
 1. Create/sign into a Google AI Studio account and obtain a Gemini API key. Check that the selected model is available on your project's free tier. Do not enable paid billing if zero spend is required. Free availability and quotas can change; no unlimited-use promise is made.
 2. Create/sign into a Cloudflare account with Workers Free.
