@@ -1,4 +1,4 @@
-import * as E from './engine.js';
+import * as E from './engine.js?v=body-limits-1';
 const $=s=>document.querySelector(s),esc=s=>String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 let d,runs,evidence,b,tab='attributes',history=[],chatHistory=[],teamCode='',busy=false,revision=0;
 let endpoint=localStorage.getItem('fc26-endpoint')||'';
