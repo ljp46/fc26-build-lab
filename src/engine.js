@@ -1,6 +1,16 @@
 export const normalize = s => String(s).toLowerCase().replace(/[^a-z0-9]/g, '');
 export const title = s => String(s).replace(/([a-z])([A-Z])/g,'$1 $2').replace(/\b\w/g,c=>c.toUpperCase());
 export function archetype(d,b){const a=d.archetypes.find(a=>a.name===b.archetype);if(!a)throw Error('Unknown archetype');return a;}
+export function bodySizes(d,b,field){
+ if(!['height','weight'].includes(field))throw Error('Unknown body measurement.');
+ const pairs=Object.keys(d.body[archetype(d,b).name.toLowerCase()]).map(k=>k.split('-').map(Number));
+ const index=field==='height'?0:1,other=field==='height'?b.weight:b.height;
+ return [...new Set(pairs.filter(p=>p[1-index]===other).map(p=>p[index]))].sort((a,b)=>a-b);
+}
+export function setBodySize(d,b,field,value){
+ if(!Number.isInteger(value)||!bodySizes(d,b,field).includes(value))throw Error(`Choose a supported ${field} for ${b.archetype}.`);
+ return {...b,[field]:value};
+}
 export function fresh(d,name='Magician',level=100){const a=archetype(d,{archetype:name});return {version:1,name:'My build',archetype:name,level,attributes:Object.fromEntries(Object.entries(a.attributeRanges).map(([k,v])=>[k,v.min])),skillMoves:a.skillMoveRating.base,weakFoot:a.weakFootRating.base,height:d.bodyDefaults[name].heightCm,weight:d.bodyDefaults[name].weightKg,gender:'male',playstyles:[],plus:[],specialization:'',facilities:{},clubLevel:10,facilityMode:'planned',runStyle:'',locks:[]};}
 export const budget=(d,b)=>d.levels.filter(l=>l.level<=b.level).reduce((s,l)=>s+l.apReward,0);
 export function attributeCost(d,b,key,value=b.attributes[key]){const r=archetype(d,b).attributeRanges[key];let tier=b.archetype==='Target'&&key==='Strength'?3:d.tiers[key];tier=Math.max(0,tier-(r.isKeyAttribute?1:0));let cost=0;for(let n=r.min+1;n<=value;n++){const band=n<55?'50-54':n<=60?'55-60':n<=63?'61-63':n<=66?'64-66':n<=69?'67-69':n<=74?'70-74':n<=79?'75-79':n<=84?'80-84':n<=89?'85-89':n<=94?'90-94':String(n);cost+=d.costs[tier][band];}return cost;}

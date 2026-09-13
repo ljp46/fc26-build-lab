@@ -1,5 +1,15 @@
 import {test} from 'node:test';import assert from 'node:assert/strict';import fs from 'node:fs';import * as E from '../src/engine.js';
 const d=JSON.parse(fs.readFileSync(new URL('../data/game.json',import.meta.url)));
+test('body selectors enforce every archetype boundary and reject unsupported input',()=>{
+ for(const a of d.archetypes){const b=E.fresh(d,a.name);for(const field of ['height','weight']){
+  const sizes=E.bodySizes(d,b,field);assert.ok(sizes.includes(b[field]));
+  for(const value of [sizes[0],sizes.at(-1)])assert.deepEqual(E.validate(d,E.setBodySize(d,b,field,value)),[]);
+  for(const value of [sizes[0]-1,sizes.at(-1)+1,175.5,NaN,'175'])assert.throws(()=>E.setBodySize(d,b,field,value),/supported/);
+ }
+ }
+ assert.deepEqual([E.bodySizes(d,E.fresh(d,'Magician'),'height')[0],E.bodySizes(d,E.fresh(d,'Magician'),'height').at(-1)],[163,188]);
+ assert.deepEqual([E.bodySizes(d,E.fresh(d,'Target'),'height')[0],E.bodySizes(d,E.fresh(d,'Target'),'height').at(-1)],[178,196]);
+});
 test('all 11 archetypes start valid at both ends of progression',()=>{for(const a of d.archetypes)for(const level of [1,100])assert.deepEqual(E.validate(d,E.fresh(d,a.name,level)),[],a.name);});
 test('source calculator checkpoints: AP and Magician incremental costs',()=>{const b=E.fresh(d,'Magician',1);assert.equal(E.budget(d,b),100);assert.equal(E.budget(d,{...b,level:100}),3167);for(const [k,expected]of Object.entries({Agility:6,Balance:4,Reactions:4,BallControl:6,Dribbling:8,Composure:4}))assert.equal(E.attributeCost(d,b,k,b.attributes[k]+1),expected,k);});
 test('Target strength tier override, star costs, and slot boundary',()=>{const b=E.fresh(d,'Target');assert.equal(E.attributeCost(d,b,'Strength',76),6);b.skillMoves=5;b.weakFoot=5;assert.equal(E.spent(d,b),185);assert.equal(E.slots(d,{...b,level:20}),2);assert.equal(E.slots(d,{...b,level:30}),3);});
